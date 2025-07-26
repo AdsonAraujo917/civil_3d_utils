@@ -1,20 +1,16 @@
 
 public class Xdata
 {
-    private static ResultBuffer insertOldXData(string appName, ResultBuffer newResultBuffer, DBObject dbObject)
+    private static ResultBuffer insertOldXData(string appName, ResultBuffer resultBuffer, DBObject dbObject)
     {
         ResultBuffer oldResultBuffer = dbObject.GetXDataForApplication(appName);
-        if (oldResultBuffer != null)
+        if (oldResultBuffer == null) return resultBuffer;
+        foreach (TypedValue typedValue in oldResultBuffer.AsArray()
+            .Where(x => x.TypeCode != (int)DxfCode.ExtendedDataRegAppName))
         {
-            foreach (TypedValue typedValue in oldResultBuffer)
-            {
-                if (typedValue.TypeCode != (int)DxfCode.ExtendedDataRegAppName)
-                {
-                    newResultBuffer.Add(new TypedValue((int)typedValue.TypeCode, typedValue.Value));
-                }
-            }
+            resultBuffer.Add(new TypedValue((int)typedValue.TypeCode, typedValue.Value));
         }
-        return newResultBuffer;
+        return resultBuffer;
     }
     
     private static bool createRegAppTableRecord(string appName, Transaction transaction, Database database)
