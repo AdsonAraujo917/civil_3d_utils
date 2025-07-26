@@ -1,6 +1,22 @@
 
 public class Xdata
 {
+    private static ResultBuffer insertOldXData(string appName, ResultBuffer newResultBuffer, DBObject dbObject)
+    {
+        ResultBuffer oldResultBuffer = dbObject.GetXDataForApplication(appName);
+        if (oldResultBuffer != null)
+        {
+            foreach (TypedValue typedValue in oldResultBuffer)
+            {
+                if (typedValue.TypeCode != (int)DxfCode.ExtendedDataRegAppName)
+                {
+                    newResultBuffer.Add(new TypedValue((int)typedValue.TypeCode, typedValue.Value));
+                }
+            }
+        }
+        return newResultBuffer;
+    }
+    
     private static bool createRegAppTableRecord(string appName, Transaction transaction, Database database)
     {
         RegAppTable regAppTable = (RegAppTable)transaction.GetObject(database.RegAppTableId, OpenMode.ForRead);
